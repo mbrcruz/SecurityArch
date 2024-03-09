@@ -41,21 +41,51 @@ int main (int ac, char **av) {
         // Step 2: measure the access latency
         l1_latency[i] = measure_one_block_access_time((uint64_t)target_buffer);
     }
-
     // ======
     // [1.2] TODO: Measure DRAM Latency, store results in dram_latency array
     // ======
     //
+    for (int i=0; i<SAMPLES; i++){
+        // Step 1: bring the target cache line into L1 by simply accessing the line
+        clflush(target_buffer);
+
+        // Step 2: measure the access latency
+        dram_latency[i] = measure_one_block_access_time((uint64_t)target_buffer);
+    }
+    
 
     // ======
     // [1.2] TODO: Measure L2 Latency, store results in l2_latency array
     // ======
     //
-
+    // Allocate a buffer of 9 x 64 Bytes to evict L1
+    // the size of an unsigned integer (uint64_t) is 8 Bytes
+    // Therefore, we request 8 * 8 * 8 Bytes
+    uint64_t *target_buffer_all_l1 = (uint64_t *)malloc(9 * 8*sizeof(uint64_t));
+    for (int i=0; i<SAMPLES; i++){
+        // force L1 evict
+        for (int j=0; j<9; j++){            
+            tmp = target_buffer_all_l1[j*8];            
+        }            
+        // Step 2: measure the access latency
+        l2_latency[i] = measure_one_block_access_time((uint64_t)target_buffer_all_l1);       
+    }
     // ======
     // [1.2] TODO: Measure L3 Latency, store results in l3_latency array
     // ======
     //
+    // Allocate a buffer of 64 x 17 Bytes to evict L2
+    // the size of an unsigned integer (uint64_t) is 8 Bytes
+    // Therefore, we request 2561 * 8 * 8 Bytes
+    // uint64_t *target_buffer_all_l2 = (uint64_t *)malloc(17 * 8*sizeof(uint64_t));
+    // for (int i=0; i<SAMPLES; i++){
+    //     // force L1 evection
+    //     for (int j=0; j<=8; j++)
+    //         tmp = target_buffer_all_l1[j*64];
+
+    //     // Step 2: measure the access latency
+    //     l3_latency[i] = measure_one_block_access_time((uint64_t)target_buffer_all_l2);
+    // }
 
 
     // Print the results to the screen
